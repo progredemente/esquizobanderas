@@ -70,8 +70,6 @@ class App extends Component {
     drawCanvas() {
         let tempCanvas = this.getTempCanvas();
         const realContext = this.canvas.current.getContext("2d");
-        realContext.fillStyle = "white";
-        realContext.fillRect(0, 0, this.width * this.state.scaleFactor, this.height * this.state.scaleFactor);
         realContext.drawImage(tempCanvas, 0, 0, this.width * this.state.scaleFactor, this.height * this.state.scaleFactor);
     }
 
@@ -80,6 +78,8 @@ class App extends Component {
         tempCanvas.width = this.width;
         tempCanvas.height = this.height;
         const tempContext = tempCanvas.getContext("2d");
+        tempContext.fillStyle = "white";
+        tempContext.fillRect(0, 0, this.width, this.height);
         this.drawFlag(tempContext);
         this.drawCoat(tempContext);
         this.drawUrl(tempContext);
@@ -139,14 +139,24 @@ class App extends Component {
                     tempCanvas.height = side;
                     const tempContext = tempCanvas.getContext("2d");
                     tempContext.drawImage(loadedImage, side / 2 - loadedImage.width / 2, side / 2 - loadedImage.height / 2);
-                    this.setState({coat: tempCanvas}, () => {
-                        this.drawCanvas();
-                    });
+                    this.setState({coat: tempCanvas}, () => this.drawCanvas);
                 }
             });
             fr.readAsDataURL(input.files[0]);
         }
         input.click();
+    }
+
+    download() {
+        const link = document.createElement('a');
+        link.download = 'esquizobanderas.png';
+        const canvas = this.getTempCanvas();
+        canvas.toBlob((blob) => {
+            let url = URL.createObjectURL(blob);
+            link.href = url;
+            link.click();
+        })
+
     }
 
     render() {
@@ -168,7 +178,7 @@ class App extends Component {
                         <canvas ref={this.canvas} width={this.width * this.state.scaleFactor} height={this.height * this.state.scaleFactor}/>
                         {
                             this.state.coat &&
-                            <div className='prg-button download'>Descargar&nbsp;<Icon icon="D" /></div>
+                            <div className='prg-button download' onClick={() => {this.download() }}>Descargar&nbsp;<Icon icon="D" /></div>
                         }
                     </div>
                     <div className='options-container'>
